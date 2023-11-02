@@ -2,6 +2,7 @@ package edu.utsa.cs3443.ici506_lab4.model;
 
 import android.app.Activity;
 import android.content.res.AssetManager;
+import android.util.Log;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,6 +36,10 @@ public class Trivia {
 
     //TODO: Write the setters and getters for all the instance variables
 
+    public String getCorrectAnswer(){
+        return this.correctAnswer;
+    }
+
     //loadTrivia: This method takes in an Activity (MainActivity) from input as an argument, it reads the file
     //and stores one piece of trivia from that file.
     /*
@@ -43,7 +48,7 @@ public class Trivia {
     loadTrivia: This method takes in an Activity from input as an argument, it reads the file
     and stores 1 piece of trivia from that file.
      */
-    public Trivia loadTrivia(Activity activity){
+    public Trivia loadTrivia(Activity activity) {
         //Get an instance of AssetManager
         //Read the file in the assets folder using InputStream
         //How many lines are in this file, the number of lines are equivalent to the number of trivia questions
@@ -53,22 +58,23 @@ public class Trivia {
 
         AssetManager manager = activity.getAssets();
         Scanner scanner;
-        try{
+        try {
             InputStream input = manager.open("trivia.csv");
             scanner = new Scanner(input);
             int i = 0;
-            while(scanner.hasNextLine()){
+            while (scanner.hasNextLine()) {
                 i++;
             }
-            System.out.println("Number of lines: "+ i);
+            System.out.println("Number of lines: " + i);
             //Randomly select a number from 1 to i
             SecureRandom sRandom = new SecureRandom();
             int lineNumber = sRandom.nextInt(i) + 1;
 
             int j = 1;
             String line = "";
-            while(j<lineNumber){
+            while (j < lineNumber) {
                 line = scanner.next();
+                j++;
             }
             //when this loop is over, I am standing right by the line that I want to return
 
@@ -80,22 +86,36 @@ public class Trivia {
             this.option3 = lineSplit[3].trim();
             this.descriptionAnswer = lineSplit[4];
             //From index 4 forward, we have the description
-            for (int k = 5; k < lineSplit.length; k++){
+            for (int k = 5; k < lineSplit.length; k++) {
                 this.descriptionAnswer = this.descriptionAnswer + "," + lineSplit[k];
             }
 
             return (this);
-        }catch (FileNotFoundException e){
-            System.err.println("File not found");
-        }catch (IOException e){
-            System.err.println("IO exception, which is a super class of FileNotFoundException");
+        } catch(FileNotFoundException e ){
+            Log.d("Exception", "File not found");
         }
-
+        catch (IOException e){
+            //IO Exception can happen for various reasons: file not found, access permission, corrupt file
+            Log.d("Exception: ", "IO Exception");
+        }
+        //if catch happens, meaning we have an error reading or accessing the file:
+        //Program control will be going through catch, we see a print statement (Log.d)
+        //Then the program control return (this)
+        //This is pointing to the current object of Trivia, but all instance variables (such as question, options, etc.)
+        //are going to be NULL! Because we weren't successful in reading them from the file
         return (this);
     }
 
     private void identifyCorrectAnswer(){
         //takes all the options and checks if the description contains any of the options, if so, that
         //option becomes the correctAnswer
+        if(this.descriptionAnswer.contains(this.option1)){
+            this.correctAnswer = this.option1;
+        }
+        else if (this.descriptionAnswer.contains(this.option2)){
+            this.correctAnswer = this.option2;
+        }
+        else
+            this.correctAnswer = this.option3;
     }
 }
